@@ -1,6 +1,14 @@
 'use client'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import {
+  ArrowLeft,
+  ShieldCheck,
+  Award,
+  HardHat,
+  Sparkles,
+  Lightbulb,
+  ReceiptText,
+} from 'lucide-react'
 import type { Quote, QuoteBreakdown } from '@/lib/types'
 import { fmtINR, fmtNum } from '@/lib/calculations'
 import { getCompany } from '@/lib/companies'
@@ -23,6 +31,16 @@ const C = {
   dark: '#1E1A16',
 }
 const SERIF = "Georgia, 'Times New Roman', 'Noto Serif', serif"
+
+const LIGHT_LABELS: Record<string, string> = {
+  single_color: 'Single Colour',
+  single_color_dimmable: 'Single Colour Dimmable',
+  tunable: 'Tunable White',
+  tunable_dali: 'Tunable DALI',
+  rgb: 'RGB',
+  rgbw: 'RGBW',
+}
+const lightLabel = (t: string) => LIGHT_LABELS[t] ?? t
 const SANS =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
@@ -84,8 +102,7 @@ export function ClientPdfDocument({
       if (item) {
         bits.push(item.shape.charAt(0).toUpperCase() + item.shape.slice(1))
         bits.push(item.fabricType)
-        if (item.lightType !== 'none')
-          bits.push(item.lightType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
+        if (item.lightType !== 'none') bits.push(lightLabel(item.lightType))
       }
       rows.push({
         article: `${String(i + 1).padStart(2, '0')}`,
@@ -498,7 +515,7 @@ export function ClientPdfDocument({
               }}
             >
               <div style={{ fontFamily: SERIF, fontSize: 17, color: C.ink }}>
-                Thank you for considering {company.shortName}.
+                Thank you for considering {company.shortName}
               </div>
               <div style={{ fontSize: 11.5, color: C.soft, marginTop: 6 }}>
                 We look forward to bringing precision, craft and light to your space.
@@ -508,56 +525,193 @@ export function ClientPdfDocument({
           <Footer company={company} pageNo="03" />
         </div>
 
-        {/* ================= PAGE 4 — CLOSING ================= */}
-        <div className="quote-pdf-page" style={{ padding: 0, background: C.dark, position: 'relative' }}>
+        {/* ================= PAGE 4 — WHY CHOOSE US ================= */}
+        <div className="quote-pdf-page" style={{ padding: 0, background: C.paper, position: 'relative' }}>
+          <Masthead company={company} accent={accent} />
           <div
             style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: "url('/why-pongs.jpg')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: 0.28,
-            }}
-          />
-          <div
-            style={{
-              position: 'relative',
-              height: 1123,
+              padding: '46px 56px 0',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              padding: 56,
-              color: '#F3EEE6',
+              alignItems: 'center',
+              height: 1123 - 84,
               boxSizing: 'border-box',
             }}
           >
-            <Monogram text={company.logoText} accent={accent} light />
-            <div>
-              <div style={{ fontFamily: SERIF, fontSize: 40, lineHeight: 1.15 }}>
-                Crafted light,
-                <br />
-                seamless ceilings.
+            {/* two-tone heading */}
+            <div style={{ textAlign: 'center' }}>
+              <Eyebrow accent={accent}>The {company.shortName} Promise</Eyebrow>
+              <div style={{ marginTop: 10, fontFamily: SERIF, fontSize: 34, color: C.ink, lineHeight: 1.15 }}>
+                Why our clients{' '}
+                <span style={{ color: accent }}>choose us</span>
               </div>
-              <div style={{ marginTop: 26, fontSize: 13, lineHeight: 2, opacity: 0.9 }}>
-                <div>Authentic imported membrane</div>
-                <div>Seamless spans &amp; bespoke geometry</div>
-                <div>Integrated, engineered lighting</div>
-                <div>Certified installation teams</div>
-                <div>Transparent, precision-calculated pricing</div>
+              <div style={{ marginTop: 10, fontSize: 12.5, color: C.soft, maxWidth: 440, marginInline: 'auto' }}>
+                Six commitments behind every ceiling we deliver — the reasons this quote is one you
+                can act on with confidence.
               </div>
             </div>
-            <div style={{ borderTop: '1px solid rgba(243,238,230,0.25)', paddingTop: 22 }}>
-              <div style={{ fontFamily: SERIF, fontSize: 18 }}>{company.name}</div>
-              <div style={{ fontSize: 11.5, opacity: 0.82, marginTop: 6, lineHeight: 1.7 }}>
-                {company.address}, {company.city}
-                <br />
-                {company.phone}  ·  {company.email}  ·  {company.website}
+
+            {/* radial trust diagram */}
+            <RadialTrust accent={accent} shortName={company.shortName} logoText={company.logoText} />
+
+            {/* footer contact card */}
+            <div
+              style={{
+                marginTop: 'auto',
+                width: '100%',
+                borderTop: `1px solid ${C.line}`,
+                paddingTop: 22,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+              }}
+            >
+              <div>
+                <div style={{ fontFamily: SERIF, fontSize: 18, color: C.ink }}>{company.name}</div>
+                <div style={{ fontSize: 11, color: C.soft, marginTop: 5, lineHeight: 1.7 }}>
+                  {company.address}, {company.city}
+                </div>
               </div>
+              <div style={{ textAlign: 'right', fontSize: 11, color: C.soft, lineHeight: 1.7 }}>
+                <div>{company.phone}</div>
+                <div>{company.email}</div>
+                <div style={{ color: accent, fontWeight: 600 }}>{company.website}</div>
+              </div>
+            </div>
+            <div
+              style={{
+                textAlign: 'center',
+                fontSize: 9,
+                letterSpacing: 1,
+                color: C.muted,
+                textTransform: 'uppercase',
+                paddingTop: 14,
+              }}
+            >
+              04
             </div>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Radial "why choose us" trust diagram (inspired by hub-and-spoke ecosystem)
+// ---------------------------------------------------------------------------
+function RadialTrust({
+  accent,
+  shortName,
+  logoText,
+}: {
+  accent: string
+  shortName: string
+  logoText: string
+}) {
+  const SIZE = 560
+  const cx = SIZE / 2
+  const cy = SIZE / 2
+  const R = 208 // ring radius (badge centres)
+  const items = [
+    { icon: ShieldCheck, title: 'Authentic Membrane', sub: 'Imported, certified fabric' },
+    { icon: Award, title: '10-Year Warranty', sub: 'On manufacturing defects' },
+    { icon: HardHat, title: 'Certified Installers', sub: 'Trained, in-house teams' },
+    { icon: Sparkles, title: 'Seamless Spans', sub: 'Bespoke geometry, no joints' },
+    { icon: Lightbulb, title: 'Integrated Lighting', sub: 'Engineered cove & LED' },
+    { icon: ReceiptText, title: 'Transparent Pricing', sub: 'Precision-calculated' },
+  ]
+  // start at top (-90°), 60° apart
+  const nodes = items.map((it, i) => {
+    const a = (-90 + i * 60) * (Math.PI / 180)
+    return { ...it, x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) }
+  })
+
+  return (
+    <div style={{ position: 'relative', width: SIZE, height: SIZE, margin: '18px 0 8px' }}>
+      {/* dashed ring + spokes */}
+      <svg width={SIZE} height={SIZE} style={{ position: 'absolute', inset: 0 }}>
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke={C.line} strokeWidth={1.5} strokeDasharray="2 7" />
+        {nodes.map((n, i) => (
+          <line key={i} x1={cx} y1={cy} x2={n.x} y2={n.y} stroke={C.lineSoft} strokeWidth={1} />
+        ))}
+      </svg>
+
+      {/* center hub */}
+      <div
+        style={{
+          position: 'absolute',
+          left: cx - 74,
+          top: cy - 74,
+          width: 148,
+          height: 148,
+          borderRadius: '50%',
+          background: C.dark,
+          color: '#F3EEE6',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 10px 30px rgba(30,26,22,0.25)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: SERIF,
+            fontSize: 22,
+            color: '#fff',
+            border: `1.5px solid ${accent}`,
+            borderRadius: 8,
+            padding: '4px 10px',
+          }}
+        >
+          {logoText}
+        </div>
+        <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', marginTop: 8, opacity: 0.75 }}>
+          Why Choose
+        </div>
+        <div style={{ fontSize: 11, fontWeight: 600, marginTop: 1, maxWidth: 118, textAlign: 'center', lineHeight: 1.2 }}>
+          {shortName}
+        </div>
+      </div>
+
+      {/* nodes */}
+      {nodes.map((n, i) => {
+        const Icon = n.icon
+        return (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              left: n.x - 70,
+              top: n.y - 34,
+              width: 140,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                background: '#fff',
+                border: `1.5px solid ${C.line}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(30,26,22,0.06)',
+              }}
+            >
+              <Icon size={24} color={accent} strokeWidth={1.6} />
+            </div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: C.ink, marginTop: 8 }}>{n.title}</div>
+            <div style={{ fontSize: 9.5, color: C.muted, marginTop: 1, lineHeight: 1.3 }}>{n.sub}</div>
+          </div>
+        )
+      })}
     </div>
   )
 }
